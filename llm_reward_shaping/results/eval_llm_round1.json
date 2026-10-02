@@ -1,0 +1,8 @@
+{
+  "success_rate": 0.6,
+  "avg_reward": 3.8680000000000008,
+  "avg_episode_length": 21.92,
+  "avg_collisions": 0.0,
+  "reward_variance": 52.43977599999998,
+  "n_episodes": 50
+}
