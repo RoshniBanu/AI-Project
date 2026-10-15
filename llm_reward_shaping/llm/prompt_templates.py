@@ -1,4 +1,5 @@
 import json
+
 REWARD_GENERATION_PROMPT = """You are a reward design expert for reinforcement learning.
 
 TASK OBJECTIVE (from user, in natural language):
@@ -9,13 +10,11 @@ Your job: propose a reward configuration for a Grid World RL agent, using EXACTL
 - "obstacle": penalty given when the agent collides with an obstacle. Must be a negative number between -20 and 0.
 - "efficiency": small penalty given at every step to encourage shorter paths. Must be a negative number between -2 and 0.
 
-Respond with ONLY a valid JSON object in this exact format, with no extra text, no markdown formatting, no explanation:
-{{"goal": <number>, "obstacle": <number>, "efficiency": <number>}}
+Also include a "reasoning" field: 2-3 plain sentences explaining why you chose these weights for this objective.
+
+Respond with ONLY a valid JSON object in this exact format, with no extra text and no markdown:
+{{"reasoning": "<your explanation>", "goal": <number>, "obstacle": <number>, "efficiency": <number>}}
 """
-
-def build_reward_generation_prompt(objective: str) -> str:
-    return REWARD_GENERATION_PROMPT.format(objective=objective)
-
 
 REWARD_REFINEMENT_PROMPT = """You are a reward design expert for reinforcement learning.
 
@@ -32,19 +31,26 @@ OBSERVED AGENT PERFORMANCE AFTER TRAINING WITH THIS REWARD:
 - Average collisions per episode: {avg_collisions}
 - Reward variance (stability indicator): {reward_variance}
 
-Analyze this performance. Diagnose likely causes of any weaknesses (for example: low success rate,
-long episode length, or high collisions may indicate an imbalance between the goal reward, obstacle
-penalty, and step penalty).
+Analyze this performance and diagnose likely causes of any weaknesses (for example, low success rate,
+long episodes, or high collisions can indicate an imbalance between the goal reward, obstacle penalty,
+and step penalty).
 
-Then propose a REVISED reward configuration to improve agent behavior, using EXACTLY these three
-components:
+Then propose a REVISED reward configuration, using EXACTLY these three components:
 - "goal": positive number between 0 and 20
 - "obstacle": negative number between -20 and 0
 - "efficiency": negative number between -2 and 0
 
-Respond with ONLY a valid JSON object in this exact format, with no extra text, no markdown formatting, no explanation:
-{{"goal": <number>, "obstacle": <number>, "efficiency": <number>}}
+Also include a "reasoning" field: 2-3 plain sentences stating what you diagnosed from the metrics and
+which weights you changed and why.
+
+Respond with ONLY a valid JSON object in this exact format, with no extra text and no markdown:
+{{"reasoning": "<your diagnosis and changes>", "goal": <number>, "obstacle": <number>, "efficiency": <number>}}
 """
+
+
+def build_reward_generation_prompt(objective: str) -> str:
+    return REWARD_GENERATION_PROMPT.format(objective=objective)
+
 
 def build_reward_refinement_prompt(objective, previous_config, performance_report):
     return REWARD_REFINEMENT_PROMPT.format(
